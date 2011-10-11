@@ -9,6 +9,11 @@ class jenkins_slave {
       require => [ Package[git], Jenkinsuser[jenkins] ]
     }
 
+    devstackrepo { "devstack":
+      ensure => present,
+      require => [ Package[git], Jenkinsuser[jenkins] ]
+    }
+
     cron { "updateci":
       user => jenkins,
       minute => "*/15",
