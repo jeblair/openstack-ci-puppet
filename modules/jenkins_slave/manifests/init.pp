@@ -9,10 +9,6 @@ class jenkins_slave {
       require => [ Package[git], Jenkinsuser[jenkins] ]
     }
 
-    apt::ppa { "ppa:tarmac/ppa":
-      ensure => present,
-    }
-
     cron { "updateci":
       user => jenkins,
       minute => "*/15",
@@ -72,11 +68,6 @@ class jenkins_slave {
     package { "python-dev":
          ensure => latest
            }
-
-    package { "tarmac":
-      ensure => latest,
-      require => Apt::Ppa["ppa:tarmac/ppa"]
-    }
 
     package { "python-pip":
         ensure => latest,
