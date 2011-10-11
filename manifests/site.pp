@@ -294,6 +294,12 @@ node /^driver(\d+)\.1918\.openstack\.org$/ {
   include openstack_jenkins_slave
 }
 
+node /^deploy(\d+)\.1918\.openstack\.org$/ {
+  include openstack_jenkins_slave
+  #include openstack_server
+  include orchestra
+}
+
 node /^debuild(-\d+)?\.slave\.openstack\.org$/ {
   include openstack_jenkins_slave
   include cowbuilder

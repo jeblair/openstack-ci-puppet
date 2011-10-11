@@ -1,0 +1,26 @@
+<%
+import orchestra.utils.cloudinit
+import base64
+
+cfg = """#cloud-config
+apt_update: false
+apt_upgrade: false
+disable_root: false
+output: {all: '| tee -a /var/log/cloud-init-output.log'}
+runcmd:
+ - echo "cloud init waiting"
+ - sleep 60
+ - sudo apt-get -y install kexec-tools
+ - sudo sed -i /etc/default/kexec -e s/LOAD_KEXEC=false/LOAD_KEXEC=true/
+ - sudo lvrename /dev/main/root orig_root
+ - sudo lvcreate -L20G -s -n root /dev/main/orig_root
+ - reboot
+ssh_authorized_keys: 
+ - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5/Vy4gV9NFr4qqmCqWPWM2my1qRv/UtGLGTHsQVIGCZnIBF7FLNwCJuzx0a9xfe30UoeTT33fwnBlsrxLedxm8zT0HcKeltQV+YSWCPJx+afal5qPM/YdzyCRVdKlhzDXUZ1qXzdWXb9Q7/W6fusSXBdvlLGJj3JPUxATaZHYW8xrR9UMPpx4L2mMOg38FdIdeEV5rUBzY3d6+n1delVmx3l8DeEFCv2ofUc5Ouqw6tzphRnq6qYyCF+kGjm5TBMFBYXXyIkV9K+pQ1LMdqjDNzKAIGky6Gk5gOy3EKM+blJDLmpQCJ6wSACOPb+ercJIek6YEIHZNN4F5OvRZU+T root@deploy2
+"""
+
+user_data = orchestra.utils.cloudinit.get_user_data_late_command(base64.b64encode(cfg))
+
+%> \
+$orchestra.utils.cloudinit.get_meta_data_late_command($getVar('$uid', 'true'), $getVar('$hostname', 'true')) \ && \
+$user_data \
