@@ -8,6 +8,7 @@ class openstack_base {
   include ssh
   include snmpd
   include exim
+  include sudoers
 
   class { 'iptables':
     public_tcp_ports => $iptables_public_tcp_ports,

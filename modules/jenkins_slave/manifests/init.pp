@@ -1,23 +1,24 @@
 class jenkins_slave {
 
     jenkinsuser { "jenkins":
-      ensure => present
+      ensure => present,
     }
 
     slavecirepo { "openstack-ci":
       ensure => present,
-      require => [ Package[git], Jenkinsuser[jenkins] ]
+      require => [ Package[git], Jenkinsuser[jenkins] ],
     }
 
     devstackrepo { "devstack":
       ensure => present,
-      require => [ Package[git], Jenkinsuser[jenkins] ]
+      require => [ Package[git], Jenkinsuser[jenkins] ],
     }
 
     cron { "updateci":
       user => jenkins,
       minute => "*/15",
-      command => "cd /home/jenkins/openstack-ci && /usr/bin/git pull -q origin master"
+      command => "cd /home/jenkins/openstack-ci && /usr/bin/git pull -q origin master",
+      require => [ Jenkinsuser[jenkins] ],
     }
 
     file { 'aptsources':
