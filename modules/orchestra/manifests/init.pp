@@ -1,4 +1,5 @@
 class orchestra {
+    $mysql_pass = generate('/usr/bin/openssl', 'rand', '-hex', '12')
     package { ipmitool: ensure => present }
     package { ubuntu-orchestra-server: ensure => present }
     exec { cobbler-sync:
@@ -10,8 +11,17 @@ class orchestra {
         File["/var/lib/cobbler/snippets/openstack_module_blacklist"],
         File["/var/lib/cobbler/snippets/openstack_cloud_init"],
         File["/var/lib/cobbler/snippets/openstack_network_sleep"],
+        File["/var/lib/cobbler/snippets/openstack_mysql_password"],
         File["/var/lib/cobbler/kickstarts/openstack-test.preseed"],
 	],
+    }
+    file { '/var/lib/cobbler/snippets/openstack_mysql_password':
+      owner => 'root',
+      group => 'root',
+      mode => 444,
+      ensure => 'present',
+      content	  => template('orchestra/openstack_mysql_password.erb'),
+      replace	  => 'false',
     }
     file { "/etc/cobbler/dnsmasq.template":
       owner => 'root',
@@ -58,5 +68,12 @@ class orchestra {
       replace => 'true',
       require => Package["ubuntu-orchestra-server"],
     }
-
+    file { "/etc/sudoers.d/orchestra-jenkins":
+      owner => 'root',
+      group => 'root',
+      mode => 440,
+      ensure => 'present',
+      source =>  "puppet:///modules/orchestra/orchestra-jenkins-sudoers",
+      replace => 'true',
+    }
 }

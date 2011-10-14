@@ -1,5 +1,7 @@
 define devstackrepo($ensure = present) {
   $repo_there = "test -d /home/jenkins/devstack"
+  $mysql_pass = $orchestra::mysql_pass
+  $rabbit_pass = generate('/usr/bin/openssl', 'rand', '-hex', '12')
   case $ensure {
     present: {
       exec { "Clone devstack git repo":
@@ -10,6 +12,17 @@ define devstackrepo($ensure = present) {
         group       => "root",
         unless      => "$repo_there",
         logoutput   => on_failure,
+      }
+      file { '/home/jenkins/devstack/localrc':
+        owner => 'root',
+        group => 'root',
+        mode => 444,
+        ensure => 'present',
+        content => template('jenkins_slave/localrc.erb'),
+        replace => 'false',
+	require => [Exec["Clone devstack git repo"],
+	            File["/var/lib/cobbler/snippets/openstack_mysql_password"],
+		    ]
       }
       exec { "Update devstack git repo":
         path        => "/usr/sbin:/usr/bin:/sbin:/bin",
