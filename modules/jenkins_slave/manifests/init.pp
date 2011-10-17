@@ -96,4 +96,9 @@ class jenkins_slave {
         require => [Apt::Ppa["ppa:nova-core/trunk"],
                     Package[python-coverage]]
           }
+
+    package { "python-unittest2":
+        ensure => latest,
+        require => Apt::Ppa["ppa:nova-core/trunk"],
+          }
 }
