@@ -5,7 +5,7 @@ class orchestra {
     exec { cobbler-sync:
       command => "/usr/bin/cobbler sync",
       logoutput => true,
-      onlyif => "/bin/false",
+      refreshonly => true,
       subscribe => [
         File["/etc/cobbler/dnsmasq.template"],
         File["/var/lib/cobbler/snippets/openstack_module_blacklist"],
@@ -13,6 +13,14 @@ class orchestra {
         File["/var/lib/cobbler/snippets/openstack_network_sleep"],
         File["/var/lib/cobbler/snippets/openstack_mysql_password"],
         File["/var/lib/cobbler/kickstarts/openstack-test.preseed"],
+	],
+    }
+    exec { rsyslog-restart:
+      command => "/sbin/restart rsyslog",
+      logoutput => true,
+      refreshonly => true,
+      subscribe => [
+        File["/etc/rsyslog.d/99-orchestra.conf"],
 	],
     }
     file { '/var/lib/cobbler/snippets/openstack_mysql_password':
@@ -74,6 +82,14 @@ class orchestra {
       mode => 440,
       ensure => 'present',
       source =>  "puppet:///modules/orchestra/orchestra-jenkins-sudoers",
+      replace => 'true',
+    }
+    file { "/etc/rsyslog.d/99-orchestra.conf":
+      owner => 'root',
+      group => 'root',
+      mode => 440,
+      ensure => 'present',
+      source =>  "puppet:///modules/orchestra/99-orchestra.conf",
       replace => 'true',
     }
 }
